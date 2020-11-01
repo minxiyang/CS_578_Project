@@ -17,17 +17,18 @@ def featureScaling(data,trainingSet=False): # preprocessing the data
 	
 	for label in logScale.keys():
 
-		data.loc[data[label]>logScale[label],[label]]=logScale[label]
-		data.loc[data[label]>-999.,[label]]=data.loc[data[label]>-999.,[label]].apply(lambda x:log(x+1))	
+		data.loc[(data[label]>logScale[label]),[label]]=logScale[label]
+		data.loc[(data[label]>-999.),[label]]=data.loc[(data[label]>-999.),[label]].apply(lambda x:log(x+1))	
 
 	for label, content in data.items():
 		if label!="EventId" and label!="Weight" and label!="Label" and label!="PRI_jet_num":
 
-			std=data.loc[data[label]>-999.,[label]].std()
-			mean=data.loc[data[label]>-999.,[label]].mean()
-			data.loc[data[label]>-999.,[label]]=(data.loc[data[label]>-999.,[label]]-mean)/std
-			minimal=data.loc[data[label]>-999.,[label]].min()
-			data.loc[data[label]==-999.,[label]]=minimal-1.
+			std=data.loc[(data[label]>-999.),[label]].std()
+			mean=data.loc[(data[label]>-999.),[label]].mean()
+			data.loc[(data[label]>-999.),[label]]=(data.loc[data[label]>-999.,[label]]-mean)/std
+			minimal=data.loc[(data[label]>-999.),[label]].min()
+			minimal=minimal.values
+			data.loc[(data[label]==-999.),[label]]=minimal-1
 	
 
 
