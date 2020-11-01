@@ -40,6 +40,26 @@ for label, content in data.items():
 		plt.savefig("plots/plots_raw_log/"+label+".pdf")
 		plt.clf()
 						
-		
+SigWeight=data.loc[data['Label']=="s",["Weight"]]
+SigWeight=SigWeight.astype(float)
+SigWeight=SigWeight.to_numpy()
+SigWeight=SigWeight.reshape(-1,)
+plt.hist(SigWeight,100,label="signal",alpha=0.5,facecolor="red")
+plt.xlabel("signal weight")
+plt.ylabel("distribution")
+plt.savefig("plots/plots_raw/signalWeight.pdf")
+plt.clf()
+
+BkgWeight=data.loc[data['Label']=="b",["Weight"]]                       
+BkgWeight=BkgWeight.astype(float)
+BkgWeight=BkgWeight.to_numpy()
+BkgWeight=BkgWeight.reshape(-1,)
+plt.hist(BkgWeight,100,label="background",alpha=0.5,facecolor="green")
+plt.xlabel("background weight")
+plt.ylabel("distribution")
+plt.savefig("plots/plots_raw/backgroundWeight.pdf")
+plt.clf()
+
+SigWeight=data.loc[data['Label']=="s",["Weight"]]	
 
 
