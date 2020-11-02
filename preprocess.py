@@ -17,4 +17,4 @@ featureScaling(testingSet)
 plotFeatures(trainingSet,plotPath)
 
 trainingSet.to_csv("data/trainingSet.csv",index=False,header=True)
-trainingSet.to_csv("data/testingSet.csv",index=False,header=True)
+testingSet.to_csv("data/testingSet.csv",index=False,header=True)
