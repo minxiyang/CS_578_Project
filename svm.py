@@ -123,10 +123,10 @@ class SVM():
 
         plt.xlabel('Specificity')
         plt.ylabel('Sensitivity') 
-        plt.title('ROC with gamma = ' + str(gamma) + ', C = ' + str(C))
+        plt.title('SVM ROC with gamma = ' + str(gamma) + ', C = ' + str(C))
         plt.plot(x_axis, y_axis, label="AUC = " + str(round(AUC,4)))
         plt.legend()
-        plt.savefig('ROC.png')
+        plt.savefig('SVM_ROC.png')
 
         return AUC
 
