@@ -64,7 +64,8 @@ class SVM():
         print("start train")
 
         self.model = SVC(C = C, kernel='rbf', gamma = gamma)
-        self.model.fit(X, y, sample_weight = weight)
+        #self.model.fit(X, y, sample_weight = weight)
+        self.model.fit(X, y)
 
         print("finish train")
 
