@@ -43,8 +43,8 @@ class SVM():
         AUCs = k*[None]
 
         for i in range(k):
-            train_fold_indices = range(i*d,(i+1)*d)
-            test_fold_indices = np.setdiff1d(range(0,n), train_fold_indices)
+            test_fold_indices = range(i*d,(i+1)*d)
+            train_fold_indices = np.setdiff1d(range(0,n), test_fold_indices)
 
             X_train_fold = self.X_train.iloc[train_fold_indices]
             X_weight_fold = self.X_train_weight.iloc[train_fold_indices]
@@ -64,7 +64,8 @@ class SVM():
         print("start train")
 
         self.model = SVC(C = C, kernel='rbf', gamma = gamma)
-        self.model.fit(X, y, sample_weight = weight)
+        #self.model.fit(X, y, sample_weight = weight)
+        self.model.fit(X, y)
 
         print("finish train")
 
