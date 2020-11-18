@@ -54,7 +54,8 @@ class SVM():
             
             self.train(X_train_fold, y_train_fold, X_weight_fold, gamma, C)
 
-            x_axis, y_axis = self.get_ROC_curve(X_test_fold, y_test_fold)
+            decision_func_vals = self.model.decision_function(X_test_fold)
+            x_axis, y_axis = self.get_ROC_curve(decision_func_vals, y_test_fold)
             AUC = np.trapz(y_axis, x=x_axis)
             AUCs[i] = AUC
         
@@ -69,27 +70,27 @@ class SVM():
 
         print("finish train")
 
-    def get_ROC_curve(self, X, y):
+    def get_ROC_curve(self, decision_func_vals, y):
         print("start get_ROC_curve")
 
         num = 50
-        x_axis = num*[None]
-        y_axis = num*[None]
-        decision_func_vals = self.model.decision_function(X)
+        x_ROC = num*[None]
+        y_ROC = num*[None]
 
         i = 0        
         for threshold in np.linspace( min(decision_func_vals), max(decision_func_vals), num=num ):                
-            specificity, sensitivity = self.compute_metrics(y, decision_func_vals, threshold)
+            TP, TN, FP, FN = self.compute_TP_TN_FP_FN(y, decision_func_vals, threshold)
+            specificity, sensitivity = self.compute_spec_sens(TP, TN, FP, FN)
 
-            x_axis[i] = specificity
-            y_axis[i] = sensitivity
+            x_ROC[i] = specificity
+            y_ROC[i] = sensitivity
             i += 1
 
         print("finish get_ROC_curve")
 
-        return x_axis, y_axis
+        return x_ROC, y_ROC
 
-    def compute_metrics(self, y_test_fold, decision_func_vals, threshold):
+    def compute_TP_TN_FP_FN(self, y_test_fold, decision_func_vals, threshold):
         TP = FP = TN = FN = 0
         for i in range(len(y_test_fold)):
             y_actual = y_test_fold.iloc[i]
@@ -108,31 +109,107 @@ class SVM():
             if y_hat == 'b' and y_actual != y_hat:
                 FN += 1
         
-        #accuracy = (TP + TN) / (TP + FP + FN + TN)
-        #error = (FP + FN) / (TP + FP + FN + TN)
-        #precision = TP / (TP + FP)
+        return TP, TN, FP, FN
+    
+    def compute_spec_sens(self, TP, TN, FP, FN):
         specificity = TN / (TN + FP)
-        sensitivity = TP / (TP + FN)
-        
+        sensitivity = TP / (TP + FN) 
+
         return specificity, sensitivity
 
     def test(self, gamma, C):
         self.train(self.X_train, self.y_train, self.X_train_weight, gamma, C)
+        scores_on_test = self.model.decision_function(self.X_test)
+        scores_on_train = self.model.decision_function(self.X_train)
 
-        x_axis, y_axis = self.get_ROC_curve(self.X_test, self.y_test)
-        AUC = np.trapz(y_axis, x=x_axis)
+        x_ROC, y_ROC        = self.get_ROC_curve(scores_on_test, self.y_test)
+        AUC                 = np.trapz(y_ROC, x=x_ROC)
+        best_thres          = self.get_best_AMS_thres(scores_on_train, self.y_train)
+        TP, TN, FP, FN      = self.compute_TP_TN_FP_FN(self.y_test, scores_on_test, best_thres)
+        max_ams             = self.AMS(TP, FP)
 
-        plt.xlabel('Specificity')
-        plt.ylabel('Sensitivity') 
-        plt.title('SVM ROC with gamma = ' + str(gamma) + ', C = ' + str(C))
-        plt.plot(x_axis, y_axis, label="AUC = " + str(round(AUC,4)))
-        plt.legend()
-        plt.savefig('SVM_ROC.png')
+        self.plot_curve(x_ROC, y_ROC, 'Specificity', 'Sensitivity', 'ROC', 'SVM_ROC.png', gamma, C, AUC)
+        print()
+        print("Best threshold that maximizes AMS")
+        print("Maximum AMS = " + str(round(max_ams, 4)) + " with threshold = " + str(round(best_thres, 4)))
+        print()
+        print("Confusion matrix with best threshold")
+        print("TP = " + str(round(TP, 4)) + ", FP = " + str(round(FP, 4)))
+        print("FN = " + str(round(FN, 4)) + ", TN = " + str(round(TN, 4)))
+        print()
+        self.accuracy_VS_numTrain(gamma, C)
 
-        return AUC
+    def accuracy_VS_numTrain(self, gamma, C):
+        k = 30
+        n = len(self.X_train)
+        d = int(n/k)
+        x_axis = [None]*k
+        y_axis = [None]*k
+
+        for i in range(k):
+            train_fold_indices = range(i*d,(i+1)*d)
+
+            X_train_fold    = self.X_train.iloc[train_fold_indices]
+            X_weight_fold   = self.X_train_weight.iloc[train_fold_indices]
+            y_train_fold    = self.y_train.iloc[train_fold_indices]
+            
+            self.train(X_train_fold, y_train_fold, X_weight_fold, gamma, C)
+
+            scores_on_train = self.model.decision_function(X_train_fold)
+            scores_on_test  = self.model.decision_function(self.X_test)
+
+            best_thres      = self.get_best_AMS_thres(scores_on_train, y_train_fold)
+            TP, TN, FP, FN  = self.compute_TP_TN_FP_FN(self.y_test, scores_on_test, best_thres)
+            accuracy        = (TP + TN) / (TP + FP + FN + TN)
+
+            x_axis[i]       = (i+1)*1000
+            y_axis[i]       = accuracy
+        
+        x_label  = 'Number of Training Sample'
+        y_label  = 'Accuracy'
+        title    = 'Accur vs. num of train sample'
+        filename = 'SVM_accuracies.png'
+
+        self.plot_curve(x_axis, y_axis, x_label, y_label, title, filename, gamma, C, -1)
+
+    def get_best_AMS_thres(self, decision_func_vals, y):
+        max_ams = 0
+        best_thres = 0
+
+        num = 50
+        for threshold in np.linspace( min(decision_func_vals), max(decision_func_vals), num=num ):                
+            TP, TN, FP, FN = self.compute_TP_TN_FP_FN(y, decision_func_vals, threshold)
+            ams = self.AMS(TP, FP)
+
+            if (ams > max_ams):
+                max_ams = ams
+                best_thres = threshold
+
+        return best_thres 
+    
+    def plot_curve(self, x_axis, y_axis, x_label, y_label, title, filename, gamma, C, AUC):
+        plt.figure()
+        plt.xlabel(x_label)
+        plt.ylabel(y_label) 
+        plt.title(title + ' of SVM with gamma = ' + str(gamma) + ', C = ' + str(C))
+        if AUC > 0:
+            plt.plot(x_axis, y_axis, label="AUC = " + str(round(AUC,4)))
+            plt.legend()
+        else:
+            plt.plot(x_axis, y_axis)
+        plt.savefig('./plots/SVM/' + filename)
+
+    def AMS(self, TP, FP):
+        s = TP
+        b = FP
+        return math.sqrt( 2*( (s + b + 10)*math.log(1 + s/(b+10)) - s ) )
 
 if __name__ == "__main__":
     svm = SVM()
-    gamma, C = svm.hyperparameter_tune()
-    print(svm.test(gamma, C))           # draw ROC and compute AUC with best parameters
-    print(gamma, C)                     # the best parameters chosen from hyperparameter tuning
+    #gamma, C = svm.hyperparameter_tune()
+    gamma, C = 0.01, 10
+    print()
+    print("Best hyperparameters")
+    print("Gamma = " + str(gamma) + ", C = " + str(C))
+    print()
+    svm.test(gamma, C)
