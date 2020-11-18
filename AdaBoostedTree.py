@@ -98,22 +98,27 @@ if __name__=="__main__":
 	y_test = test_data['Label']
 
 	#define model 
+	for n_est in [1,3,5]:
+		for n_lay in [3,4,5]:
+			for lr in [0.01]:
 
-	bdt=AdaBoostClassifier(DecisionTreeClassifier(max_depth=5),n_estimators=50,learning_rate=1)
+				bdt=AdaBoostClassifier(DecisionTreeClassifier(max_depth=n_lay),n_estimators=n_est,learning_rate=lr)
 	
 	# k-fold cross vaildation
 
-	k=5
+				k=5
 	
-	[AUC_mean,AUC_var,FPRs,TPRs]=kfold(k,bdt,x_train,y_train,w_train)
+				[AUC_mean,AUC_var,FPRs,TPRs]=kfold(k,bdt,x_train,y_train,w_train)
 	#plot ROC
 
-	plt.xlabel("FP rate")
-	plt.ylabel("TP rate")
+				plt.xlabel("FP rate")
+				plt.ylabel("TP rate")
 	
-	for i in range(k):
+				for i in range(k):
 
-		plt.plot(FPRs[i],TPRs[i])
+					plt.plot(FPRs[i],TPRs[i])
 
-	plt.savefig("plots/AdaBoostTree/ROC_kfold.pdf")
+				plt.figtext(0.2,0.9,'AUC_mean='+str(AUC_mean))
+				plt.figtext(0.2,0.9,'AUC_var='+str(AUC_var))
+				plt.savefig("plots/AdaBoostTree/ROC_kfold_nest"+str(n_est)+"_lay"+str(n_lay)+"_lr"+str(lr)+".pdf")
 
