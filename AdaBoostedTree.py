@@ -118,7 +118,7 @@ if __name__=="__main__":
 
 					plt.plot(FPRs[i],TPRs[i])
 
-				plt.figtext(0.2,0.9,'AUC_mean='+str(AUC_mean))
-				plt.figtext(0.2,0.9,'AUC_var='+str(AUC_var))
+				plt.figtext(0.1,0.9,'AUC_mean='+str(AUC_mean))
+				plt.figtext(0.6,0.9,'AUC_var='+str(AUC_var))
 				plt.savefig("plots/AdaBoostTree/ROC_kfold_nest"+str(n_est)+"_lay"+str(n_lay)+"_lr"+str(lr)+".pdf")
 
