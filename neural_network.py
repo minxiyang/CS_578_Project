@@ -428,7 +428,7 @@ def test(x_data, y_data, x_data_weight, x_test, y_test, x_test_weight, num_hidde
     optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=momentum,
                                 weight_decay=weight_decay)
 
-    PATH = './result/neural_network/test/train_size' + str(ntrain) + '/'
+    PATH = './result/neural_network/test/train_size' + str(ndata) + '/'
     if not os.path.isdir(PATH):
         try:
             os.makedirs(PATH)
@@ -670,7 +670,7 @@ def main():
          val_auc_mean, val_auc_std], f)
     f.close()
 
-    temp = val_auc_mean.argmin()
+    temp = val_auc_mean.argmax()
     best_num_hidden_index = temp // len(activation_list)
     best_activation_index = temp % len(activation_list)
 
