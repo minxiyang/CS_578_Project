@@ -540,6 +540,14 @@ def acc_vs_training_sample(x_data, y_data, x_data_weight, x_test, y_test, x_test
         test_acc_list[train_index] = test_accuracy
 
     PATH = './result/neural_network/test/'
+    if not os.path.isdir(PATH):
+        try:
+            os.makedirs(PATH)
+        except OSError as exc:  # Python >2.5
+            if exc.errno == errno.EEXIST and os.path.isdir(PATH):
+                pass
+            else:
+                raise
     plt.clf()
     # plt.plot(train_size_list, train_acc_list, label = 'Training')
     plt.plot(train_size_list, test_acc_list, label = 'Testing')
@@ -547,6 +555,15 @@ def acc_vs_training_sample(x_data, y_data, x_data_weight, x_test, y_test, x_test
     plt.ylabel('Accuracy')
     plt.legend(loc='lower right')
     plt.savefig(PATH + 'acc_vs_size.png')
+    PATH = './plots/neural_network/'
+    if not os.path.isdir(PATH):
+        try:
+            os.makedirs(PATH)
+        except OSError as exc:  # Python >2.5
+            if exc.errno == errno.EEXIST and os.path.isdir(PATH):
+                pass
+            else:
+                raise
     plt.savefig('./plots/neural_network/acc_vs_size.png')
 
     return train_acc_list, test_acc_list
@@ -616,6 +633,14 @@ def main():
             val_auc_mean[num_hidden_index, activation_index] = val_auc_list.mean()
             val_auc_std[num_hidden_index, activation_index] = val_auc_list.std()
     PATH = './result/neural_network/'
+    if not os.path.isdir(PATH):
+        try:
+            os.makedirs(PATH)
+        except OSError as exc:  # Python >2.5
+            if exc.errno == errno.EEXIST and os.path.isdir(PATH):
+                pass
+            else:
+                raise
     import pickle
     filename = PATH + 'result.txt'
     f = open(filename, 'wb')
@@ -633,6 +658,15 @@ def main():
     best_activation = activation_list[best_activation_index]
 
     train_TP, train_TN, train_FP, train_FN, train_accuracy, train_AUC, test_TP, test_TN, test_FP, test_FN, test_accuracy, test_AUC = test(x_data, y_data, x_data_weight, x_test, y_test, x_test_weight, best_num_hidden, best_activation,  lr = 0.001, momentum = 0.9, weight_decay =0.0001, nepoch = 300, subn = 128, num_bin = 100)
+    PATH = './plots/neural_network/'
+    if not os.path.isdir(PATH):
+        try:
+            os.makedirs(PATH)
+        except OSError as exc:  # Python >2.5
+            if exc.errno == errno.EEXIST and os.path.isdir(PATH):
+                pass
+            else:
+                raise
     plt.savefig('./plots/neural_network/roc_curve.png')
     PATH = './result/neural_network/'
     import pickle
@@ -642,7 +676,7 @@ def main():
         [train_TP, train_TN, train_FP, train_FN, train_accuracy, train_AUC, test_TP, test_TN, test_FP, test_FN, test_accuracy, test_AUC], f)
     f.close()
 
-    
+
     # Train the model with different size of training data
     train_acc_list, test_acc_list = acc_vs_training_sample(x_data, y_data, x_data_weight, x_test, y_test, x_test_weight, num_hidden, activation,  lr = 0.001, momentum = 0.9, weight_decay =0.0001, nepoch = 300, subn = 128, num_bin = 100, seed = 1)
 
