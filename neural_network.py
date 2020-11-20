@@ -8,21 +8,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import argparse
 
-
-
 parser = argparse.ArgumentParser(description='Higgs Boson')
 parser.add_argument('--nepoch', default = 300, type = int, help = 'total number of training epochs')
 parser.add_argument('--lr', default = 0.001, type = float, help = 'initial learning rate')
 parser.add_argument('--momentum', default = 0.9, type = float, help = 'momentum in SGD')
 parser.add_argument('--weight_decay', default = 0.0001, type = float, help = 'weight decay in SGD')
 parser.add_argument('--batch_train', default = 128, type = int, help = 'batch size for training')
-
 parser.add_argument('--n_hidden_list', default=[1,2,3], type = int, nargs='+', help = 'number of hidden layer')
 parser.add_argument('--activation_list', default=['tanh','relu'], type = str, nargs='+', help = 'set activation function')
 
-
 args = parser.parse_args()
-
 
 class Net_tanh(nn.Module):
     def __init__(self, input_dim, num_hidden, output_dim):
@@ -43,7 +38,6 @@ class Net_tanh(nn.Module):
         x = self.fc_list[-1](x)
         return x
 
-
 class Net_relu(nn.Module):
     def __init__(self, input_dim, num_hidden, output_dim):
         super(Net_relu, self).__init__()
@@ -63,32 +57,21 @@ class Net_relu(nn.Module):
         x = self.fc_list[-1](x)
         return x
 
-
 def cal_auc(output, target, num_bin, weight, final_threshold = 0.5, plot = False, plot_label = None):
     min_val = output.min().item()
     max_val = output.max().item()
     threshold = np.linspace(min_val, max_val, num_bin)
     sensitivity_list = np.zeros([num_bin])
     specificity_list = np.zeros([num_bin])
-
     for i,t in enumerate(threshold):
         predict = (output > t)
         label = (target == 1)
-        # P = target.sum().item()
-        # TP = predict[target == 1].sum().item()
-        # FN = P - TP
-        # N = target.numel() - P
-        # FP = predict.sum().item()- TP
-        # TN = N - FP
-
         P = weight[label].sum().item()
         TP = weight[label * predict].sum().item()
         FN = P - TP
         N = weight.sum().item() - P
         FP = weight[predict].sum().item() - TP
         TN = N - FP
-
-
         if P > 0:
             sensitivity = TP / P
         else:
@@ -105,17 +88,14 @@ def cal_auc(output, target, num_bin, weight, final_threshold = 0.5, plot = False
         plt.plot(1 - specificity_list, sensitivity_list, label = plot_label)
 
     t = final_threshold
-
     predict = (output > t)
     label = (target == 1)
-
     P = weight[label].sum().item()
     TP = weight[label * predict].sum().item()
     FN = P - TP
     N = weight.sum().item() - P
     FP = weight[predict].sum().item() - TP
     TN = N - FP
-
     if P > 0:
         sensitivity = TP / P
     else:
@@ -126,38 +106,25 @@ def cal_auc(output, target, num_bin, weight, final_threshold = 0.5, plot = False
         specificity = 0
     return TP, TN, FP, FN, sensitivity, specificity,AUC
 
-
-
 def cal_AMS(output, target, num_bin, weight):
     min_val = output.min().item()
     max_val = output.max().item()
     threshold = np.linspace(min_val, max_val, num_bin)
     sensitivity_list = np.zeros([num_bin])
     specificity_list = np.zeros([num_bin])
-
     unnorm_TPR = np.zeros([num_bin])
     unnorm_FPR = np.zeros([num_bin])
-
     for i,t in enumerate(threshold):
         predict = (output > t)
         label = (target == 1)
-        # P = target.sum().item()
-        # TP = predict[target == 1].sum().item()
-        # FN = P - TP
-        # N = target.numel() - P
-        # FP = predict.sum().item()- TP
-        # TN = N - FP
-
         P = weight[label].sum().item()
         TP = weight[label * predict].sum().item()
         FN = P - TP
         N = weight.sum().item() - P
         FP = weight[predict].sum().item() - TP
         TN = N - FP
-
         unnorm_TPR[i] = TP
         unnorm_FPR[i] = FP
-
         if P > 0:
             sensitivity = TP / P
         else:
@@ -173,14 +140,10 @@ def cal_AMS(output, target, num_bin, weight):
     AMS = np.sqrt(2 * ((unnorm_TPR + unnorm_FPR + br)*np.log(1 + unnorm_TPR / (unnorm_FPR + br)) - unnorm_TPR))
     index = np.argmax(AMS)
     t = threshold[index]
-    
     return AUC, t
 
 
-
-
 def kfold_cv(x_data, y_data, x_data_weight, num_hidden, activation,  lr = 0.001, momentum = 0.9, weight_decay =0.0001, nepoch = 300, subn = 128, num_bin = 100, init_seed = 1):
-
     train_auc_list = np.zeros(5)
     val_auc_list = np.zeros(5)
     best_epoch_list = np.zeros(5)
@@ -265,9 +228,7 @@ def kfold_cv(x_data, y_data, x_data_weight, num_hidden, activation,  lr = 0.001,
         val_auc_path = np.zeros(num_epochs)
 
         torch.manual_seed(seed)
-
         index = np.arange(ntrain)
-
         best_val_auc = 0
         best_epoch = 0
         stop_flag = False
@@ -283,6 +244,7 @@ def kfold_cv(x_data, y_data, x_data_weight, num_hidden, activation,  lr = 0.001,
                 loss = (loss_func(output, y_train[subsample,]) * x_train_weight[subsample]).mean()
                 loss.backward()
                 optimizer.step()
+
             with torch.no_grad():
                 print('epoch: ', epoch)
                 output = net(x_train)
@@ -315,8 +277,8 @@ def kfold_cv(x_data, y_data, x_data_weight, num_hidden, activation,  lr = 0.001,
                     if best_epoch < epoch - 10:
                         stop_flag = True
                         break
-
             torch.save(net.state_dict(), PATH + 'model' + str(epoch) + '.pt')
+
         train_auc_list[cross_validate_index] = train_auc_path[best_epoch]
         val_auc_list[cross_validate_index] = val_auc_path[best_epoch]
         best_epoch_list[cross_validate_index] = best_epoch
@@ -329,11 +291,9 @@ def kfold_cv(x_data, y_data, x_data_weight, num_hidden, activation,  lr = 0.001,
              val_accuracy_path, val_TP_path, val_auc_path], f)
         f.close()
         
-        
         net.load_state_dict(torch.load(PATH + 'model' + str(best_epoch) + '.pt'))
         with torch.no_grad():
             print('best epoch: ', best_epoch)
-            
             plt.figure(1)
             plt.xlabel('False Positive Rate')
             plt.ylabel('True Positive Rate')
@@ -347,7 +307,6 @@ def kfold_cv(x_data, y_data, x_data_weight, num_hidden, activation,  lr = 0.001,
             train_accuracy = (train_TP + train_TN) / x_train_weight.sum()
             print("Training: Loss ", train_loss, 'Accuracy: ', train_accuracy, 'Sensitivity', train_sensitivity,
                   'Specificity', train_specificity, 'AUC', train_AUC)
-
 
             plt.figure(2)
             plt.xlabel('False Positive Rate')
@@ -375,10 +334,7 @@ def kfold_cv(x_data, y_data, x_data_weight, num_hidden, activation,  lr = 0.001,
         
     return train_auc_list, val_auc_list, best_epoch_list
 
-
-
 def test(x_data, y_data, x_data_weight, x_test, y_test, x_test_weight, num_hidden, activation,  lr = 0.001, momentum = 0.9, weight_decay =0.0001, nepoch = 300, subn = 128, num_bin = 100, seed = 1):
-
     # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     device = torch.device("cpu")
 
@@ -396,7 +352,6 @@ def test(x_data, y_data, x_data_weight, x_test, y_test, x_test_weight, num_hidde
     y_val = y_data[index[train_size:]]
     x_val_weight = x_data_weight[index[train_size:]]
 
-
     x_train = torch.FloatTensor(x_train).to(device)
     y_train = torch.LongTensor(y_train).view(-1).to(device)
     x_train_weight = torch.FloatTensor(x_train_weight).view(-1).to(device)
@@ -404,7 +359,6 @@ def test(x_data, y_data, x_data_weight, x_test, y_test, x_test_weight, num_hidde
     x_val = torch.FloatTensor(x_val).to(device)
     y_val = torch.LongTensor(y_val).view(-1).to(device)
     x_val_weight = torch.FloatTensor(x_val_weight).view(-1).to(device)
-
 
     x_test = torch.FloatTensor(x_test).to(device)
     y_test = torch.LongTensor(y_test).view(-1).to(device)
@@ -486,8 +440,6 @@ def test(x_data, y_data, x_data_weight, x_test, y_test, x_test_weight, num_hidde
             train_auc_path[epoch] = AUC
             print("Training: Loss ", train_loss, 'Accuracy: ', train_accuracy, 'Sensitivity', sensitivity,
                   'Specificity', specificity, 'AUC', AUC)
-            
-
 
             output = net(x_test)
             probability = F.softmax(output, dim=1)[:, 1]
@@ -543,7 +495,6 @@ def test(x_data, y_data, x_data_weight, x_test, y_test, x_test_weight, num_hidde
 
     with torch.no_grad():
         print('best epoch: ', best_epoch)
-
         plt.clf()
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')
@@ -556,7 +507,6 @@ def test(x_data, y_data, x_data_weight, x_test, y_test, x_test_weight, num_hidde
         train_accuracy = (train_TP + train_TN) / x_train_weight.sum()
         print("Training: Loss ", train_loss, 'Accuracy: ', train_accuracy, 'Sensitivity', train_sensitivity,
               'Specificity', train_specificity, 'AUC', train_AUC)
-
 
         output = net(x_test)
         probability = F.softmax(output, dim=1)[:, 1]
@@ -588,7 +538,6 @@ def acc_vs_training_sample(x_data, y_data, x_data_weight, x_test, y_test, x_test
         train_TP, train_TN, train_FP, train_FN, train_accuracy, train_AUC, test_TP, test_TN, test_FP, test_FN, test_accuracy, test_AUC = test(x_train, y_train, x_train_weight, x_test, y_test, x_test_weight, num_hidden, activation,  lr = 0.001, momentum = 0.9, weight_decay =0.0001, nepoch = 300, subn = 128, num_bin = 100, seed = 1)
         train_acc_list[train_index] = train_accuracy
         test_acc_list[train_index] = test_accuracy
-
 
     PATH = './result/neural_network/test/'
     plt.clf()
@@ -650,8 +599,12 @@ def main():
     val_auc_mean = np.zeros([len(num_hidden_list), len(activation_list)])
     val_auc_std = np.zeros([len(num_hidden_list), len(activation_list)])
 
+    # 5-fold cross validation
+
     for num_hidden_index, num_hidden in enumerate(num_hidden_list):
         for activation_index, activation in enumerate(activation_list):
+            print("Number of Hidden Layers:", num_hidden)
+            print("Activation Function:", activation)
             train_auc_list, val_auc_list, best_epoch_list = kfold_cv(x_data, y_data, x_data_weight, num_hidden, activation, lr=lr, momentum=momentum, weight_decay=weight_decay,
                      nepoch=nepoch, subn=subn, num_bin = num_bin, init_seed = num_hidden_index * len(activation_list) + activation_index + 1)
             train_auc_result[num_hidden_index].append(train_auc_list)
@@ -671,6 +624,7 @@ def main():
          val_auc_mean, val_auc_std], f)
     f.close()
 
+    # Retrain the model with best hyper parameters on all 30K training data
     temp = val_auc_mean.argmax()
     best_num_hidden_index = temp // len(activation_list)
     best_activation_index = temp % len(activation_list)
@@ -679,7 +633,6 @@ def main():
     best_activation = activation_list[best_activation_index]
 
     train_TP, train_TN, train_FP, train_FN, train_accuracy, train_AUC, test_TP, test_TN, test_FP, test_FN, test_accuracy, test_AUC = test(x_data, y_data, x_data_weight, x_test, y_test, x_test_weight, best_num_hidden, best_activation,  lr = 0.001, momentum = 0.9, weight_decay =0.0001, nepoch = 300, subn = 128, num_bin = 100)
-
     plt.savefig('./plots/neural_network/roc_curve.png')
     PATH = './result/neural_network/'
     import pickle
@@ -689,6 +642,8 @@ def main():
         [train_TP, train_TN, train_FP, train_FN, train_accuracy, train_AUC, test_TP, test_TN, test_FP, test_FN, test_accuracy, test_AUC], f)
     f.close()
 
+    
+    # Train the model with different size of training data
     train_acc_list, test_acc_list = acc_vs_training_sample(x_data, y_data, x_data_weight, x_test, y_test, x_test_weight, num_hidden, activation,  lr = 0.001, momentum = 0.9, weight_decay =0.0001, nepoch = 300, subn = 128, num_bin = 100, seed = 1)
 
     PATH = './result/neural_network/'
@@ -699,6 +654,9 @@ def main():
         [train_acc_list, test_acc_list], f)
     f.close()
 
+    print("Best Number of Hidden Layers:", best_num_hidden)
+    print("Best Activation Function:", best_activation)
+    print("Test TP:", test_TP, "Test TN:", test_TN, "Test FP:", test_FP, "Test FN:", test_FN, "Test AUC:", test_AUC)
 
 
 if __name__ == '__main__':
