@@ -7,9 +7,12 @@
     https://numpy.org/install/
     Scikit-learn
     https://scikit-learn.org/stable/install.html
+    Pytorch
+    https://pytorch.org
 
 1. Neural Network
-
+    python neural_network.py
+    Comment line 680-689 to avoid running experiments with different training sample size to save time.
 
 2. SVM
     Langauge: Python3.7
