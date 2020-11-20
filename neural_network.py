@@ -598,7 +598,7 @@ def acc_vs_training_sample(x_data, y_data, x_data_weight, x_test, y_test, x_test
     plt.ylabel('Accuracy')
     plt.legend(loc='lower right')
     plt.savefig(PATH + 'acc_vs_size.png')
-    plt.savefig('./plot/neural_network/acc_vs_size.png')
+    plt.savefig('./plots/neural_network/acc_vs_size.png')
 
     return train_acc_list, test_acc_list
 
@@ -680,7 +680,7 @@ def main():
 
     train_TP, train_TN, train_FP, train_FN, train_accuracy, train_AUC, test_TP, test_TN, test_FP, test_FN, test_accuracy, test_AUC = test(x_data, y_data, x_data_weight, x_test, y_test, x_test_weight, best_num_hidden, best_activation,  lr = 0.001, momentum = 0.9, weight_decay =0.0001, nepoch = 300, subn = 128, num_bin = 100)
 
-    plt.savefig('./plot/neural_network/roc_curve.png')
+    plt.savefig('./plots/neural_network/roc_curve.png')
     PATH = './result/neural_network/'
     import pickle
     filename = PATH + 'test_result.txt'
