@@ -10,11 +10,16 @@
     Pytorch
     https://pytorch.org
 
-1. Neural Network
+1. Preprocessing
+     python preprocess.py 
+     preprocess the result
+
+
+2. Neural Network
     python neural_network.py
     Comment line 680-689 to avoid running experiments with different training sample size to save time.
 
-2. SVM
+3. SVM
     Langauge: Python3.7
 
     Command to run:
@@ -24,4 +29,38 @@
     (2) Running with hyperparameter tuning
         python3 svm.py 0
 
-3. Adaptive Boosted Decision Tree
+4. Adaptive Boosted Decision Tree
+	python AdaBoostTree.py 
+	produce the main result
+
+	python TuningTree.py  
+	find the best combination of hyperparameters.
+
+5. Data files
+       data/training.csv
+       Raw data
+
+       data/trainingSet.csv
+       processed training data
+
+       data/testingSet.py
+       processed testing data
+
+
+6. Plots
+
+	plots/plots_raw
+	All the features of raw data
+
+	plots/plots_raw_log
+	All the features of raw data with log y axis
+
+	plots/plots_preprocessing
+	All the features of preprocessed data
+
+	plots/SVM
+	SVM results
+
+	plots/AdaBoostTree
+	AdaBoostedTree results
+	
