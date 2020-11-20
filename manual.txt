@@ -1,10 +1,4 @@
-1. Neural Network
-
-
-2. SVM
-    Langauge: Python3.7
-    
-    Libraries and How to download:
+0. Libraries and download links
     Pandas
     https://pandas.pydata.org/pandas-docs/stable/getting_started/index.html
     Matplotlib
@@ -13,6 +7,12 @@
     https://numpy.org/install/
     Scikit-learn
     https://scikit-learn.org/stable/install.html
+
+1. Neural Network
+
+
+2. SVM
+    Langauge: Python3.7
 
     Command to run:
     Since hyperparameter tuning takes hours, there is a way to skip it.
