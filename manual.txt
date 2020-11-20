@@ -1,0 +1,24 @@
+1. Neural Network
+
+
+2. SVM
+    Langauge: Python3.7
+    
+    Libraries and How to download:
+    Pandas
+    https://pandas.pydata.org/pandas-docs/stable/getting_started/index.html
+    Matplotlib
+    https://matplotlib.org/users/installing.html
+    Numpy
+    https://numpy.org/install/
+    Scikit-learn
+    https://scikit-learn.org/stable/install.html
+
+    Command to run:
+    Since hyperparameter tuning takes hours, there is a way to skip it.
+    (1) Running without hyperparameter tuning (gamma = 0.01, C = 100)
+        python3 svm.py 1
+    (2) Running with hyperparameter tuning
+        python3 svm.py 0
+
+3. Adaptive Boosted Decision Tree
